@@ -1,0 +1,8 @@
+{
+    "name": "nativerag-server",
+    "dependencies": [
+        "cpp-httplib",
+        "spdlog",
+        "faiss"
+    ]
+}
