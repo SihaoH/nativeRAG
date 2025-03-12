@@ -106,7 +106,7 @@ QMap<long, QList<float>> Database::loadEmbeddings(const QString& name)
 
     while (query.next()) {
         long id = query.value(0).toLongLong();
-        QByteArray vector_data = query.value(2).toByteArray();
+        QByteArray vector_data = query.value(1).toByteArray();
         const float* vector = reinterpret_cast<const float*>(vector_data.constData());
         const size_t size = vector_data.size() / sizeof(float);
         std::vector<float> ret(vector, vector + size);

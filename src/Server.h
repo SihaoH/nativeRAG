@@ -1,4 +1,5 @@
 #pragma once
+#include <httplib.h>
 #include <QCoreApplication>
 #include <QScopedPointer>
 
@@ -15,7 +16,7 @@ public:
     int run();
 
 private:
-    void setupHttpServer();
+    void initHttpServer(int port);
     void onChat(const httplib::Request& req, httplib::Response& rsp);
 
 private:

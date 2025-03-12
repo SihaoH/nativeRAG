@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>nativeRAG</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <div class="container">
+            <!-- 左侧历史记录 -->
+            <div class="sidebar" ref="sidebar">
+                <div class="new-chat" @click="createNewChat">
+                    + 新会话
+                </div>
+                <div class="history-list">
+                    <div v-for="(chat, index) in history" 
+                         :key="index" 
+                         @click="loadChat(chat)"
+                         :class="{'history-item': true, 'active': currentChatId === chat.id}">
+                        {{ chat.title }}
+                    </div>
+                </div>
+                <div class="resize-handle sidebar-handle"></div>
+            </div>
+            
+            <!-- 右侧聊天区域 -->
+            <div class="main">
+                <!-- 聊天记录 -->
+                <div class="chat-window" ref="chatWindow">
+                    <div class="chat-content">
+                        <div v-for="(msg, index) in currentChat.messages" :key="index" :class="msg.role">
+                            <div class="avatar">{{ msg.role === 'user' ? '我' : 'AI' }}</div>
+                            <div class="message-container">
+                                <div class="message">{{ msg.content }}</div>
+                                <!-- 引用链接 -->
+                                <div v-if="msg.references" class="references">
+                                    <div class="reference-title">参考来源：</div>
+                                    <div v-for="(refs, file) in groupedReferences(msg.references)" 
+                                         :key="file" 
+                                         class="reference-group">
+                                        <a :href="file" 
+                                           target="_blank" 
+                                           class="reference-link"
+                                           @mouseover="showTooltip($event, refs)"
+                                           @mouseleave="hideTooltip">
+                                            {{ file }}
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div v-if="loading" class="loading">
+                            <div class="spinner"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="resize-handle chat-handle"></div>
+                
+                <!-- 输入区域 -->
+                <div class="input-area">
+                    <div class="input-container">
+                        <textarea v-model="userInput" 
+                                 @keydown.enter.prevent="sendMessage"
+                                 placeholder="请输入您的问题..."
+                                 rows="3"></textarea>
+                        <div class="input-toolbar">
+                            <select v-model="selectedDataset" class="dataset-select">
+                                <option value="">所有知识库</option>
+                                <option v-for="ds in datasets" :key="ds" :value="ds">
+                                    {{ ds }}
+                                </option>
+                            </select>
+                            <button @click="sendMessage" :disabled="loading">发送</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 引用内容提示框 -->
+        <div class="tooltip" ref="tooltip" v-show="tooltipVisible">
+            <div v-for="(text, index) in tooltipContent" :key="index" class="tooltip-text">
+                {{ text }}
+            </div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html> 

@@ -1,7 +1,6 @@
 #pragma once
+#include "TypeDefine.h"
 #include <QObject>
-#include <QString>
-#include <QStringList>
 
 class Dataset : public QObject
 {
@@ -10,11 +9,15 @@ public:
     Dataset(QObject* parent = nullptr);
     ~Dataset() = default;
 
-    // 从json文件加载数据集配置
-    bool loadConfig(const QString& json_path = "dataset.json");
+    void init(const QString& json);
+    QStringList getList() const;
+    QList<Reference> search(const QString& query, const QString& name = QString(), int k = 3);
 
 private:
     bool processDataset(const QString& name, const QString& dir_path);
     bool processFile(const QString& name, const QString& file_path);
     QString cleanText(const QString& text);
+
+private:
+    QStringList list;
 };

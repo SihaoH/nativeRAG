@@ -1,0 +1,20 @@
+{
+    "server": {
+        "port": 56789
+    },
+    "model": {
+        "host": "http://localhost:11434",
+        "chat": "qwen2.5:7b",
+        "embed": "bge-m3"
+    },
+    "dataset": [
+        {
+            "name": "test1",
+            "path": "D:/dataset/test1"
+        },
+        {
+            "name": "test2",
+            "path": "D:/dataset/test2"
+        }
+    ]
+}
