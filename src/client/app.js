@@ -12,7 +12,7 @@ createApp({
                 context: null
             },
             datasets: [],
-            selectedDataset: '',
+            selectedDataset: localStorage.getItem('selectedDataset') || '',
             userInput: '',
             loading: false,
             tooltipVisible: false,
@@ -21,7 +21,9 @@ createApp({
             startX: 0,
             startY: 0,
             startWidth: 0,
-            startHeight: 0
+            startHeight: 0,
+            startChatHeight: 0,
+            startInputHeight: 0
         }
     },
     
@@ -41,24 +43,33 @@ createApp({
         const savedLayout = localStorage.getItem('chatLayout')
         if (savedLayout) {
             const layout = JSON.parse(savedLayout)
-            const inputArea = document.querySelector('.input-area')
             const chatWindow = this.$refs.chatWindow
+            const inputArea = document.querySelector('.input-area')
+            const handle = document.querySelector('.chat-handle')
             
-            if (layout.inputHeight) {
+            if (layout.chatHeight && layout.inputHeight) {
+                chatWindow.style.height = `${layout.chatHeight}%`
                 inputArea.style.height = `${layout.inputHeight}%`
-                chatWindow.style.flex = `${100 - layout.inputHeight}`
+                handle.style.bottom = `${layout.inputHeight}%`
             }
         }
     },
     
     async created() {
-        // 加载数据集列表
+        // 先加载数据集列表
         await this.loadDatasets()
-        // 加载历史记录
+        // 再加载历史记录
         this.loadHistory()
         // 如果没有当前会话，创建新会话
         if (!this.currentChatId) {
             this.createNewChat()
+        }
+    },
+    
+    watch: {
+        // 监听数据集选择变化
+        selectedDataset(newValue) {
+            localStorage.setItem('selectedDataset', newValue)
         }
     },
     
@@ -73,8 +84,15 @@ createApp({
         startDragChat(e) {
             this.isDragging = 'chat'
             this.startY = e.clientY
+            
+            // 添加拖动时的视觉反馈
+            e.target.classList.add('dragging')
+            
+            // 记录初始高度
             const chatWindow = this.$refs.chatWindow
-            this.startHeight = chatWindow.offsetHeight
+            const inputArea = document.querySelector('.input-area')
+            this.startChatHeight = chatWindow.offsetHeight
+            this.startInputHeight = inputArea.offsetHeight
         },
         
         onDrag(e) {
@@ -86,77 +104,93 @@ createApp({
                     this.$refs.sidebar.style.width = `${width}px`
                 }
             } else if (this.isDragging === 'chat') {
+                const deltaY = this.startY - e.clientY
                 const container = this.$refs.chatWindow.parentElement
                 const totalHeight = container.offsetHeight
-                const mouseY = e.clientY
-                const containerTop = container.getBoundingClientRect().top
-                const relativeY = mouseY - containerTop
                 
-                // 计算输入区域的新高度比例
-                let inputHeightPercent = ((totalHeight - relativeY) / totalHeight) * 100
+                // 计算新的高度百分比 - 反转加减关系
+                let chatHeightPercent = ((this.startChatHeight - deltaY) / totalHeight) * 100
+                let inputHeightPercent = ((this.startInputHeight + deltaY) / totalHeight) * 100
                 
-                // 限制高度范围
-                inputHeightPercent = Math.max(20, Math.min(50, inputHeightPercent))
-                
-                // 更新高度
-                const inputArea = document.querySelector('.input-area')
-                inputArea.style.height = `${inputHeightPercent}%`
-                
-                // 保存布局状态
-                localStorage.setItem('chatLayout', JSON.stringify({
-                    inputHeight: inputHeightPercent
-                }))
+                // 应用限制
+                if (chatHeightPercent >= 50 && chatHeightPercent <= 80 &&
+                    inputHeightPercent >= 20 && inputHeightPercent <= 50) {
+                    
+                    const chatWindow = this.$refs.chatWindow
+                    const inputArea = document.querySelector('.input-area')
+                    const handle = document.querySelector('.chat-handle')
+                    
+                    // 更新元素高度
+                    chatWindow.style.height = `${chatHeightPercent}%`
+                    inputArea.style.height = `${inputHeightPercent}%`
+                    handle.style.bottom = `${inputHeightPercent}%`
+                    
+                    // 保存布局状态
+                    localStorage.setItem('chatLayout', JSON.stringify({
+                        chatHeight: chatHeightPercent,
+                        inputHeight: inputHeightPercent
+                    }))
+                }
             }
         },
         
         stopDrag() {
+            if (this.isDragging === 'chat') {
+                // 移除拖动时的视觉反馈
+                document.querySelector('.chat-handle').classList.remove('dragging')
+            }
             this.isDragging = false
         },
         
-        // 引用提示相关方法
+        // 修改引用提示相关方法
         showTooltip(event, refs) {
             const tooltip = this.$refs.tooltip
             this.tooltipContent = refs.map(ref => ref.text)
-            tooltip.style.display = 'block'
             
+            // 计算位置
             const rect = event.target.getBoundingClientRect()
-            const tooltipWidth = 400 // 最大宽度
+            const tooltipWidth = 400
             
-            // 计算最佳显示位置
-            let left = rect.left
-            let top = rect.bottom + 5
+            // 初始位置在链接的右侧
+            let left = rect.right + 10
+            let top = rect.top
             
-            // 确保提示框不会超出屏幕右边界
+            // 如果右侧空间不足，显示在左侧
             if (left + tooltipWidth > window.innerWidth) {
-                left = window.innerWidth - tooltipWidth - 10
+                left = rect.left - tooltipWidth - 10
             }
             
-            // 确保提示框不会超出屏幕底部
+            // 如果tooltip会超出底部，向上调整
+            tooltip.style.display = 'block' // 临时显示以获取高度
             const tooltipHeight = tooltip.offsetHeight
             if (top + tooltipHeight > window.innerHeight) {
-                top = rect.top - tooltipHeight - 5
+                top = window.innerHeight - tooltipHeight - 10
             }
             
-            tooltip.style.left = `${left}px`
-            tooltip.style.top = `${top}px`
-            
+            // 设置位置并显示
+            tooltip.style.left = `${Math.max(10, left)}px`
+            tooltip.style.top = `${Math.max(10, top)}px`
             this.tooltipVisible = true
         },
         
         hideTooltip() {
             this.tooltipVisible = false
-            this.$refs.tooltip.style.display = 'none'
         },
         
-        // 引用分组方法
+        // 修改引用分组方法
         groupedReferences(references) {
             if (!references) return {}
             const groups = {}
             references.forEach(ref => {
+                // 提取文件名
+                const fileName = ref.file.split('/').pop()
                 if (!groups[ref.file]) {
-                    groups[ref.file] = []
+                    groups[ref.file] = {
+                        displayName: fileName,  // 添加显示名称
+                        refs: []
+                    }
                 }
-                groups[ref.file].push(ref)
+                groups[ref.file].refs.push(ref)
             })
             return groups
         },
@@ -271,6 +305,31 @@ createApp({
             } finally {
                 this.loading = false
             }
+        },
+        
+        // 删除会话
+        async deleteChat(chatId, event) {
+            // 阻止事件冒泡，避免触发loadChat
+            event.stopPropagation()
+            
+            if (!confirm('确定要删除这个会话吗？')) {
+                return
+            }
+            
+            // 从历史记录中删除
+            this.history = this.history.filter(chat => chat.id !== chatId)
+            
+            // 如果删除的是当前会话，切换到第一个会话或创建新会话
+            if (chatId === this.currentChatId) {
+                if (this.history.length > 0) {
+                    this.loadChat(this.history[0])
+                } else {
+                    this.createNewChat()
+                }
+            }
+            
+            // 保存更新后的历史记录
+            this.saveHistory()
         }
     }
 }).mount('#app') 

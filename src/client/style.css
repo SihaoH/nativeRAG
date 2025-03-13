@@ -13,9 +13,9 @@
 }
 
 .sidebar {
-    width: 250px;
-    min-width: 150px;
-    max-width: 500px;
+    width: 15%;
+    min-width: 15%;
+    max-width: 40%;
     background: #f5f5f5;
     border-right: 1px solid #ddd;
     overflow-y: auto;
@@ -27,11 +27,11 @@
     padding: 12px;
     cursor: pointer;
     border-bottom: 1px solid #eee;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
     border-radius: 8px;
     margin: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .history-item:hover {
@@ -42,18 +42,52 @@
     background: #e0e0e0;
 }
 
+.history-title {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: 10px;
+}
+
+.delete-btn {
+    min-width: auto;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border-radius: 50%;
+    background: #ff4444;
+    color: white;
+    font-size: 18px;
+    line-height: 24px;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.history-item:hover .delete-btn {
+    opacity: 1;
+}
+
+.delete-btn:hover {
+    background: #ff0000;
+}
+
 .main {
     flex: 1;
     display: flex;
     flex-direction: column;
-    min-width: 300px;
+    min-width: 60%;
     height: 100%;
+    position: relative;
 }
 
 .chat-window {
-    flex: 1;
+    height: 70%;
+    min-height: 50%;
+    max-height: 80%;
     overflow-y: auto;
-    padding: 20px;
+    padding: 2%;
     background: #fff;
     display: flex;
     flex-direction: column;
@@ -68,8 +102,8 @@
 }
 
 .message-container {
-    max-width: 80%;
-    margin: 10px 0;
+    max-width: 60%;
+    margin: 1% 0;
     display: flex;
     flex-direction: column;
 }
@@ -78,6 +112,7 @@
     display: flex;
     align-items: flex-start;
     margin: 20px 0;
+    justify-content: flex-start;
 }
 
 .user {
@@ -125,6 +160,7 @@
     padding: 8px;
     background: #f8f9fa;
     border-radius: 8px;
+    width: 100%;
 }
 
 .reference-title {
@@ -143,7 +179,7 @@
     display: inline-block;
     padding: 2px 5px;
     border-radius: 4px;
-    font-size: 1em;
+    position: relative;
 }
 
 .reference-link:hover {
@@ -151,17 +187,15 @@
 }
 
 .input-area {
-    position: relative;
     height: 30%;
-    min-height: 120px;
+    min-height: 20%;
     max-height: 50%;
-    padding: 20px;
+    padding: 1%;
     border-top: 1px solid #ddd;
     background: #f8f9fa;
     border-radius: 15px 15px 0 0;
     display: flex;
     flex-direction: column;
-    flex-shrink: 0;
 }
 
 .input-container {
@@ -173,41 +207,41 @@
 
 textarea {
     flex: 1;
-    padding: 15px;
+    padding: 0.8em 0.8em 2em 0.8em;
     border: 1px solid #ddd;
     border-radius: 15px;
     resize: none;
-    font-size: 1.1em;
+    font-size: 1.4em;
     line-height: 1.5;
 }
 
 .input-toolbar {
     position: absolute;
-    right: 15px;
-    bottom: 15px;
+    right: 2%;
+    bottom: 4%;
     display: flex;
-    gap: 10px;
+    gap: 5%;
     align-items: center;
 }
 
 .dataset-select {
-    padding: 8px;
+    padding: 0.8em;
     border: 1px solid #ddd;
     border-radius: 8px;
     background: white;
     font-size: 1em;
-    min-width: 150px;
+    min-width: 8em;
 }
 
 button {
-    padding: 12px 30px;
+    padding: 0.7em;
     font-size: 1.1em;
     background: #2196f3;
     color: white;
     border: none;
     border-radius: 8px;
     cursor: pointer;
-    min-width: 100px;
+    min-width: 10em;
 }
 
 button:disabled {
@@ -236,7 +270,7 @@ button:disabled {
 
 .sidebar-handle {
     cursor: ew-resize;
-    width: 5px;
+    width: 0.3%;
     height: 100%;
     right: 0;
     top: 0;
@@ -244,13 +278,18 @@ button:disabled {
 
 .chat-handle {
     cursor: ns-resize;
-    height: 5px;
+    height: 0.6%;
     width: 100%;
     position: absolute;
-    top: -2px;
+    bottom: 30%;
     left: 0;
     background-color: transparent;
     z-index: 10;
+}
+
+.chat-handle:hover,
+.chat-handle.dragging {
+    background-color: rgba(0, 0, 0, 0.1);
 }
 
 .tooltip {
@@ -263,13 +302,14 @@ button:disabled {
     z-index: 1000;
     box-shadow: 0 2px 12px rgba(0,0,0,0.15);
     border: 1px solid #ddd;
-    display: none;
+    pointer-events: none;
 }
 
 .tooltip-text {
     padding: 8px 0;
     border-bottom: 1px solid #eee;
     line-height: 1.5;
+    font-size: 0.9em;
 }
 
 .tooltip-text:last-child {

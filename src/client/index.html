@@ -20,7 +20,12 @@
                          :key="index" 
                          @click="loadChat(chat)"
                          :class="{'history-item': true, 'active': currentChatId === chat.id}">
-                        {{ chat.title }}
+                        <span class="history-title">{{ chat.title }}</span>
+                        <button class="delete-btn" 
+                                @click="deleteChat(chat.id, $event)"
+                                :title="'删除 ' + chat.title">
+                            ×
+                        </button>
                     </div>
                 </div>
                 <div class="resize-handle sidebar-handle"></div>
@@ -38,15 +43,15 @@
                                 <!-- 引用链接 -->
                                 <div v-if="msg.references" class="references">
                                     <div class="reference-title">参考来源：</div>
-                                    <div v-for="(refs, file) in groupedReferences(msg.references)" 
+                                    <div v-for="(group, file) in groupedReferences(msg.references)" 
                                          :key="file" 
                                          class="reference-group">
                                         <a :href="file" 
                                            target="_blank" 
                                            class="reference-link"
-                                           @mouseover="showTooltip($event, refs)"
+                                           @mouseenter="showTooltip($event, group.refs)"
                                            @mouseleave="hideTooltip">
-                                            {{ file }}
+                                            {{ group.displayName }}
                                         </a>
                                     </div>
                                 </div>
