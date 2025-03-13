@@ -10,7 +10,10 @@ public:
     static Database* instance();
 
     QDateTime getSavedTime(const QString& file);
-    void remove(const QString& file);
+    void removeDataset(const QString& name);
+    void removeSection(const QString& file);
+    void clearDataset(const QStringList& cur_list);
+    void clearSection(const QString& name, const QStringList& cur_list);
     long saveEmbedding(const Reference& section, const QList<float>& embedding);
     QMap<long, QList<float>> loadEmbeddings(const QString& name);
     QList<Reference> getReferenceByIndices(const QList<long>& indices);

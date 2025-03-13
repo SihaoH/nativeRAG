@@ -61,6 +61,7 @@ void Dataset::reload()
             continue;
         }
     }
+    Database::instance()->clearDataset(getList());
 }
 
 bool Dataset::processDataset(const QString& name, const QString& dir_path)
@@ -73,11 +74,14 @@ bool Dataset::processDataset(const QString& name, const QString& dir_path)
 
     // 获取目录下所有文件
     auto files = dir.entryInfoList(QDir::Files | QDir::NoDotAndDotDot);
+    QStringList file_list;
     for (const auto& info : files) {
         if (!processFile(name, info.absoluteFilePath())) {
             LOG(err) << "处理文件失败:" << info.fileName();
         }
+        file_list.append(info.absoluteFilePath());
     }
+    Database::instance()->clearSection(name, file_list);
 
     return true;
 }
@@ -97,7 +101,7 @@ bool Dataset::processFile(const QString& name, const QString& file_path)
             return true;
         } else {
             // 有更新，直接删掉旧的，后续再插入新的
-            Database::instance()->remove(file_path);
+            Database::instance()->removeSection(file_path);
         }
     }
 

@@ -85,7 +85,18 @@ QDateTime Database::getSavedTime(const QString& file)
     return QDateTime();
 }
 
-void Database::remove(const QString& file)
+void Database::removeDataset(const QString& name)
+{
+    QSqlQuery query(db);
+    query.prepare("DELETE FROM Embeddings WHERE name = ?");
+    query.addBindValue(name);
+    
+    if (!query.exec()) {
+        LOG(err) << "删除数据集记录失败:" << query.lastError().text();
+    }
+}
+
+void Database::removeSection(const QString& file)
 {
     QSqlQuery query(db);
     query.prepare("DELETE FROM Embeddings WHERE file = ?");
@@ -93,6 +104,49 @@ void Database::remove(const QString& file)
     
     if (!query.exec()) {
         LOG(err) << "删除文件记录失败:" << query.lastError().text();
+    }
+}
+
+void Database::clearDataset(const QStringList& cur_list)
+{
+    // 获取数据库中所有的dataset名称
+    QSqlQuery query(db);
+    if (!query.exec("SELECT DISTINCT name FROM Embeddings")) {
+        LOG(err) << "查询数据集列表失败:" << query.lastError().text();
+        return;
+    }
+
+    // 检查哪些dataset不在当前列表中
+    while (query.next()) {
+        QString name = query.value(0).toString();
+        if (!cur_list.contains(name)) {
+            // 删除不存在的dataset
+            removeDataset(name);
+            LOG(info) << "删除不存在的数据集:" << name;
+        }
+    }
+}
+
+void Database::clearSection(const QString& name, const QStringList& cur_list)
+{
+    // 获取该dataset下所有文件路径
+    QSqlQuery query(db);
+    query.prepare("SELECT DISTINCT file FROM Embeddings WHERE name = ?");
+    query.addBindValue(name);
+    
+    if (!query.exec()) {
+        LOG(err) << "查询文件列表失败:" << query.lastError().text();
+        return;
+    }
+
+    // 检查哪些文件不在当前列表中
+    while (query.next()) {
+        QString file = query.value(0).toString();
+        if (!cur_list.contains(file)) {
+            // 删除不存在的文件记录
+            removeSection(file);
+            LOG(info) << "删除不存在的文件记录:" << file;
+        }
     }
 }
 
