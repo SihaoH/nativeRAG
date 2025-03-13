@@ -102,16 +102,21 @@ void Server::onChat(const httplib::Request& req, httplib::Response& rsp)
 
     auto refs = dataset->search(req_content, req_dataset);
     auto reply = ModelAdapter::instance()->generate(req_content, refs, req_context);
-    auto reply_obj = QJsonDocument::fromJson(reply.toUtf8()).object();
-    QJsonArray reply_refs;
-    for (const auto& ref : refs) {
+    if (reply.isEmpty()) {
+        rsp.status = 500;
+        rsp.set_content("服务端出错，请检查日志", "text/plain");
+    } else {
+        auto reply_obj = QJsonDocument::fromJson(reply.toUtf8()).object();
+        QJsonArray reply_refs;
+        for (const auto& ref : refs) {
         QJsonObject ref_obj;
         ref_obj["name"] = ref.name;
         ref_obj["file"] = ref.file;
         ref_obj["text"] = ref.text;
         reply_refs.append(ref_obj);
+        }
+        reply_obj["reference"] = reply_refs;
+        auto reply_json = QJsonDocument(reply_obj).toJson();
+        rsp.set_content(reply_json.toStdString(), "application/json");
     }
-    reply_obj["reference"] = reply_refs;
-    auto reply_json = QJsonDocument(reply_obj).toJson();
-    rsp.set_content(reply_json.toStdString(), "application/json");
 }

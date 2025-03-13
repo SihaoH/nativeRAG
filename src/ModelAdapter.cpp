@@ -34,8 +34,10 @@ QString ModelAdapter::generate(const QString& prompt)
     if (resp && resp->status == 200) {
         QJsonDocument resp_doc = QJsonDocument::fromJson(QByteArray::fromStdString(resp->body));
         return resp_doc.object()["response"].toString();
+    } else {
+        LOG(err) << "大模型请求出错：" << QString::fromStdString(resp->body);
+        return QString();
     }
-    return "Error: Failed to generate response";
 }
 
 QString ModelAdapter::generate(const QString& prompt, const QList<Reference>& refs, const QString& context)
@@ -64,8 +66,10 @@ QString ModelAdapter::generate(const QString& prompt, const QList<Reference>& re
     
     if (resp && resp->status == 200) {
         return QString::fromStdString(resp->body);
+    } else {
+        LOG(err) << "大模型请求出错：" << QString::fromStdString(resp->body);
+        return QString();
     }
-    return "Error: Failed to generate response";
 }
 
 QString ModelAdapter::chat(const QString& messages)
@@ -81,8 +85,10 @@ QString ModelAdapter::chat(const QString& messages)
     if (resp && resp->status == 200) {
         QJsonDocument resp_doc = QJsonDocument::fromJson(QByteArray::fromStdString(resp->body));
         return resp_doc.object()["message"].toObject()["content"].toString();
+    } else {
+        LOG(err) << "大模型请求出错：" << QString::fromStdString(resp->body);
+        return QString();
     }
-    return "Error: Failed to get chat response";
 }
 
 QList<float> ModelAdapter::embed(const QString& input)
@@ -102,6 +108,8 @@ QList<float> ModelAdapter::embed(const QString& input)
         for (const auto& val : emb_arr) {
             emb_vec.append(val.toDouble());
         }
+    } else {
+        LOG(err) << "大模型请求出错：" << QString::fromStdString(resp->body);
     }
     return emb_vec;
 }
