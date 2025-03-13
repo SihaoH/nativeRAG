@@ -14,10 +14,11 @@ public:
     QList<Reference> search(const QString& query, const QString& name = QString(), int k = 3);
 
 private:
+    void reload();
     bool processDataset(const QString& name, const QString& dir_path);
     bool processFile(const QString& name, const QString& file_path);
     QString cleanText(const QString& text);
 
 private:
-    QStringList list;
+    QList<DatasetItem> list;
 };

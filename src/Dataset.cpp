@@ -24,27 +24,21 @@ void Dataset::init(const QString& json)
     }
 
     auto json_datasets = json_doc.array();
-    for (const auto& dataset_item : json_datasets) {
-        QJsonObject dataset_obj = dataset_item.toObject();
-        QString dataset_name = dataset_obj["name"].toString();
-        QString dataset_path = dataset_obj["path"].toString();
-        
-        if (dataset_name.isEmpty() || dataset_path.isEmpty()) {
-            LOG(warn) << "数据集配置不完整，跳过:" << dataset_name;
-            continue;
-        }
-
-        if (!processDataset(dataset_name, dataset_path)) {
-            LOG(err) << "处理数据集失败:" << dataset_name;
-            continue;
-        }
-        list.append(dataset_name);
+    for (const auto& item : json_datasets) {
+        QJsonObject item_obj = item.toObject();
+        list.append(DatasetItem{item_obj["name"].toString(), item_obj["path"].toString()});
     }
+
+    reload();
 }
 
 QStringList Dataset::getList() const
 {
-    return list;
+    QStringList name_list;
+    for (const auto& ds : list) {
+        name_list.append(ds.name);
+    }
+    return name_list;
 }
 
 QList<Reference> Dataset::search(const QString& query, const QString& name, int k)
@@ -52,6 +46,21 @@ QList<Reference> Dataset::search(const QString& query, const QString& name, int 
     auto embed = ModelAdapter::instance()->embed(query);
     auto ret_idx = Embeddings::instance()->search(embed, name, k);
     return Database::instance()->getReferenceByIndices(ret_idx);
+}
+
+void Dataset::reload()
+{
+    for (const auto& item : list) {
+        if (item.name.isEmpty() || item.path.isEmpty()) {
+            LOG(warn) << "数据集配置不完整，跳过:" << item.name;
+            continue;
+        }
+
+        if (!processDataset(item.name, item.path)) {
+            LOG(err) << "处理数据集失败:" << item.name;
+            continue;
+        }
+    }
 }
 
 bool Dataset::processDataset(const QString& name, const QString& dir_path)
@@ -81,12 +90,22 @@ bool Dataset::processFile(const QString& name, const QString& file_path)
         return false;
     }
 
-    QTextStream in(&file);
-    QString line;
-    while (!in.atEnd()) {
-        line = in.readLine();
-        QString cleaned_text = cleanText(line);
-        
+    auto saved_time = Database::instance()->getSavedTime(file_path);
+    if (saved_time.isValid()) {
+        if (QFileInfo(file).lastModified() < saved_time) {
+            // 没有修改，直接跳过
+            return true;
+        } else {
+            // 有更新，直接删掉旧的，后续再插入新的
+            Database::instance()->remove(file_path);
+        }
+    }
+
+    QString content = file.readAll();
+    content.replace(QRegularExpression(R"(\n+)"), "\n");
+    auto sec_list = content.split('\n');
+    for (const auto& sec : sec_list) {
+        QString cleaned_text = cleanText(sec);
         if (cleaned_text.isEmpty()) {
             continue;
         }

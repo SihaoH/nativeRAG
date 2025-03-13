@@ -67,6 +67,35 @@ bool Database::initializeDatabase()
     return success;
 }
 
+QDateTime Database::getSavedTime(const QString& file)
+{
+    QSqlQuery query(db);
+    query.prepare("SELECT MAX(time) FROM Embeddings WHERE file = ?");
+    query.addBindValue(file);
+    
+    if (!query.exec()) {
+        LOG(err) << "查询文件保存时间失败:" << query.lastError().text();
+        return QDateTime();
+    }
+    
+    if (query.next()) {
+        return query.value(0).toDateTime();
+    }
+    
+    return QDateTime();
+}
+
+void Database::remove(const QString& file)
+{
+    QSqlQuery query(db);
+    query.prepare("DELETE FROM Embeddings WHERE file = ?");
+    query.addBindValue(file);
+    
+    if (!query.exec()) {
+        LOG(err) << "删除文件记录失败:" << query.lastError().text();
+    }
+}
+
 long Database::saveEmbedding(const Reference& ref, const QList<float>& embedding)
 {
     QSqlQuery query(db);

@@ -1,6 +1,7 @@
 #pragma once
 #include "TypeDefine.h"
 #include <QSqlDatabase>
+#include <QDateTime>
 #include <QMap>
 
 class Database
@@ -8,6 +9,8 @@ class Database
 public:
     static Database* instance();
 
+    QDateTime getSavedTime(const QString& file);
+    void remove(const QString& file);
     long saveEmbedding(const Reference& section, const QList<float>& embedding);
     QMap<long, QList<float>> loadEmbeddings(const QString& name);
     QList<Reference> getReferenceByIndices(const QList<long>& indices);

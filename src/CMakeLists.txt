@@ -37,19 +37,16 @@ target_link_libraries(${TARGET}
 # 修改从VS调试时的工作目录路径
 set_target_properties(${TARGET} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_OUTPUT_DIRECTORY_INTDIR})
 
-# 拷贝配置文件
+# 为config.json创建符号链接
 add_custom_command(
     TARGET ${TARGET} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/config.json ${CMAKE_OUTPUT_DIRECTORY_INTDIR}/config.json
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/config.json
+    COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_SOURCE_DIR}/config.json ${CMAKE_OUTPUT_DIRECTORY_INTDIR}/config.json
 )
 
-# 拷贝client文件夹
+# 为client文件夹创建符号链接
 add_custom_command(
     TARGET ${TARGET} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/client ${CMAKE_OUTPUT_DIRECTORY_INTDIR}/client
-    DEPENDS 
-        ${CMAKE_CURRENT_SOURCE_DIR}/client/index.html
-        ${CMAKE_CURRENT_SOURCE_DIR}/client/style.css
-        ${CMAKE_CURRENT_SOURCE_DIR}/client/app.js
+    COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_SOURCE_DIR}/client ${CMAKE_OUTPUT_DIRECTORY_INTDIR}/client
 )
+
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/client DESTINATION ./client)

@@ -7,3 +7,8 @@ struct Reference
     QString file;
     QString text;
 };
+
+struct DatasetItem {
+    QString name;
+    QString path;
+};

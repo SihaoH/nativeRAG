@@ -48,7 +48,7 @@ bool Server::init()
     );
 
     // 初始化Dataset
-    //dataset->init(QJsonDocument(config["dataset"].toArray()).toJson());
+    dataset->init(QJsonDocument(config["dataset"].toArray()).toJson());
 
     // 初始化http服务端
     initHttpServer(config["server"].toObject()["port"].toInt());

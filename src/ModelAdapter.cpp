@@ -53,10 +53,10 @@ QString ModelAdapter::generate(const QString& prompt, const QList<Reference>& re
 "在<context></context>XML标签中使用以下上下文作为您学到的知识。\n"
 "<context>\n%1\n</context>\n"
 "当回答用户时：\n"
-"-如果你不知道，就说你不知道。\n"
-"-如果你不知道什么时候不确定，请要求澄清。\n"
-"避免提及你是从上下文中获得信息的。\n"
-"并根据用户问题的语言进行回答。\n").arg(ref_str);
+"- 如果你不知道，就说你不知道。\n"
+"- 如果你不知道什么时候不确定，请要求澄清。\n"
+"- 避免提及你是从上下文中获得信息的。\n"
+"- 并根据用户问题的语言进行回答。\n").arg(ref_str);
 
     auto resp = ollama->Post("/api/generate", 
                             QJsonDocument(req_body).toJson().toStdString(),
