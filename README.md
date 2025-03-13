@@ -66,7 +66,7 @@ cmake .. -G "Visual Studio 17 2022"
 最后打开build/nativeRAG.sln进行编译和调试
 
 ## 配置
-修改config.json，可简单配置RAG服务端的功能
+修改[config.json](./src/config.json)，可简单配置RAG服务端的功能
 - server
 	- port：服务端监听的端口号
 - model

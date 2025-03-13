@@ -5,6 +5,7 @@
 #include <QJsonArray>
 
 ModelAdapter::ModelAdapter()
+    : ollama(new httplib::Client("http://localhost:11434"))
 {
 }
 
@@ -76,7 +77,7 @@ QString ModelAdapter::chat(const QString& messages)
 {
     QJsonObject req_body;
     req_body["model"] = chatModel;
-    req_body["messages"] = messages;
+    req_body["messages"] = QJsonDocument::fromJson(messages.toUtf8()).array();
     req_body["stream"] = false;
     auto resp = ollama->Post("/api/chat",
                             QJsonDocument(req_body).toJson().toStdString(),

@@ -11,6 +11,9 @@ set(CMAKE_TOOLCHAIN_FILE ${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
 set(PROJ_NAME nativeRAG)
 project(${PROJ_NAME} VERSION 0.1)
 
+# 启用解决方案文件夹
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 17)
 
@@ -20,3 +23,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 set(CMAKE_OUTPUT_DIRECTORY_INTDIR ${PROJECT_BINARY_DIR}/bin/${CMAKE_CFG_INTDIR})
 
 add_subdirectory(src)
+
+enable_testing()
+add_subdirectory(unittest)

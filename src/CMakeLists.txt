@@ -1,7 +1,8 @@
 set(TARGET server)
-
 set(CMAKE_AUTOMOC ON)
-set(SOURCES
+
+# 将源文件分为库文件和可执行文件
+set(LIB_SOURCES
     TypeDefine.h
     Database.h
     Database.cpp
@@ -9,29 +10,44 @@ set(SOURCES
     Dataset.cpp
     Embeddings.h
     Embeddings.cpp
+    ModelAdapter.h
+    ModelAdapter.cpp
     Logger.h
     Logger.cpp
+)
+
+set(EXE_SOURCES
     Server.h
     Server.cpp
     main.cpp
-    ModelAdapter.h
-    ModelAdapter.cpp
-)
-add_executable(${TARGET}
-    ${SOURCES}
 )
 
+# 创建静态库
+add_library(${TARGET}_lib STATIC ${LIB_SOURCES})
+
+# 创建可执行文件
+add_executable(${TARGET} ${EXE_SOURCES})
+
+# 设置库的依赖
 find_package(Qt6 REQUIRED COMPONENTS Core Sql)
 find_package(faiss CONFIG REQUIRED)
 find_package(httplib CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
-target_link_libraries(${TARGET}
-    PRIVATE
+
+target_link_libraries(${TARGET}_lib
+    PUBLIC
     Qt6::Core
     Qt6::Sql
-    faiss
     httplib::httplib
+    PRIVATE
+    faiss
     spdlog::spdlog_header_only
+)
+
+# 可执行文件链接库
+target_link_libraries(${TARGET}
+    PRIVATE
+    ${TARGET}_lib
 )
 
 # 修改从VS调试时的工作目录路径
