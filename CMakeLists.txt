@@ -29,6 +29,14 @@ add_subdirectory(src)
 enable_testing()
 add_subdirectory(unittest)
 
+# 安装所依赖的dll（需要在vcvarsall.bat打开的环境下使用）
+set(APP "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/server.exe")
+set(DIRS "${CMAKE_OUTPUT_INSTALL_INTDIR}")
+install(CODE "
+    include(BundleUtilities)
+    fixup_bundle(\"${APP}\"  \"\"  \"${DIRS}\")
+   ")
+
 
 set (CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP ON)
 include(InstallRequiredSystemLibraries)

@@ -69,16 +69,7 @@ install(TARGETS ${TARGET} RUNTIME DESTINATION .)
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/client DESTINATION .)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/config.json DESTINATION .)
 
-# 安装所有dll文件到目标目录
-install(CODE "
-    file(GLOB DLL_FILES \"${CMAKE_OUTPUT_INSTALL_INTDIR}/*.dll\")
-    file(INSTALL \${DLL_FILES} DESTINATION \"\${CMAKE_INSTALL_PREFIX}/.\")
-")
-
-# 安装Qt的运行时依赖
-install(CODE "
-include(\"${QT_DEPLOY_SUPPORT}\")
-set(QT_DEPLOY_BIN_DIR \".\")
-qt_deploy_runtime_dependencies(
-    EXECUTABLE \"${CMAKE_OUTPUT_INSTALL_INTDIR}/$<TARGET_FILE_NAME:${TARGET}>\" NO_TRANSLATIONS
-)")
+# 安装Qt sqlite插件dll
+get_filename_component(QT6_ROOT "${Qt6_DIR}/../../.." ABSOLUTE)
+install(FILES ${QT6_ROOT}/plugins/sqldrivers/qsqlite.dll DESTINATION ./plugins/sqldrivers)
+install(FILES ${QT6_ROOT}/plugins/sqldrivers/qsqlodbc.dll DESTINATION ./plugins/sqldrivers)
