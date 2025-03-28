@@ -88,6 +88,13 @@ bool Dataset::processDataset(const QString& name, const QString& dir_path)
 
 bool Dataset::processFile(const QString& name, const QString& file_path)
 {
+    QFileInfo file_info(file_path);
+    QString extension = file_info.suffix().toLower();
+    if (extension != "txt" && extension != "md") {
+        LOG(warn) << "不支持的文件类型:" << file_path;
+        return false;
+    }
+
     QFile file(file_path);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         LOG(err) << "无法打开文件:" << file_path;

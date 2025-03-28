@@ -73,3 +73,11 @@ install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/config.json DESTINATION .)
 get_filename_component(QT6_ROOT "${Qt6_DIR}/../../.." ABSOLUTE)
 install(FILES ${QT6_ROOT}/plugins/sqldrivers/qsqlite.dll DESTINATION ./plugins/sqldrivers)
 install(FILES ${QT6_ROOT}/plugins/sqldrivers/qsqlodbc.dll DESTINATION ./plugins/sqldrivers)
+
+# 安装所依赖的dll（需要在vcvarsall.bat打开的环境下使用）
+set(APP "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${TARGET}.exe")
+set(DIRS "${CMAKE_OUTPUT_INSTALL_INTDIR}")
+install(CODE "
+    include(BundleUtilities)
+    fixup_bundle(\"${APP}\"  \"\"  \"${DIRS}\")
+   ")

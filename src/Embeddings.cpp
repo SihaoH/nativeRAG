@@ -27,8 +27,9 @@ QList<long> Embeddings::search(const QList<float>& query_emb, const QString& nam
     auto faiss_index = loadFromDatabase(name);
     faiss_index->search(1, query_emb.data(), k, distances.data(), indices.data());
     QList<long> idx_ret;
+    const float min_similarity = 0.6f; // 设置最低相似度阈值
     for (int i = 0; i < k; ++i) {
-        if (indices[i] >= 0) {
+        if (indices[i] >= 0 && distances[i] >= min_similarity) {
             idx_ret.push_back(indices[i]);
         }
     }
